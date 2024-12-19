@@ -3,7 +3,7 @@ const CategoryService = require('../services/categoryService');
 class CategoryController {
   // Create a new category
   static async createCategory(req, res) {
-    const { categoryName, userId, adminId } = req.body;
+    const { categoryName, userId, adminId ,image } = req.body;
 
     try {
       if (!userId && !adminId) {
@@ -14,6 +14,7 @@ class CategoryController {
         return res.status(400).json({ error: 'Only one of userId or adminId can be provided.' });
       }
       const categoryData = {
+        image :  req.file.path,
         categoryName,
         user: userId ? userId : undefined,
         admin: adminId ? adminId : undefined,

@@ -1,18 +1,28 @@
 const borrowRequestRepository = require('../repositories/borrowRequestRepository');
 const bookRepository = require('../repositories/bookRepository')
+const AdminbookRepository = require('../repositories/AdminbookRepository')
 
 // Request to borrow a book
-const requestToBorrowBook = async (LibrarianId , userId, bookId) => {
-    const book = await bookRepository.getBookById(bookId);
-    if (!book) {
-      throw new Error('Book not found');
-    }
-    
-    if (book.availableCopies <= 0) {
-      throw new Error('No copies available for borrowing');
-    }
-    return await borrowRequestRepository.createBorrowRequest(LibrarianId , userId, bookId);
-  };
+const requestToBorrowBook = async (LibrarianId, userId, bookId) => {
+  // Check for the book in both repositories
+  const bookFromRepository = await bookRepository.getBookById(bookId);
+  const bookFromAdminRepository = await AdminbookRepository.getBookById(bookId);
+
+  // Determine if the book exists in either repository
+  const book = bookFromRepository || bookFromAdminRepository;
+
+  if (!book) {
+    throw new Error('Book not found');
+  }
+
+  if (book.availableCopies <= 0) {
+    throw new Error('No copies available for borrowing');
+  }
+
+  // Create a borrow request if the book is available
+  return await borrowRequestRepository.createBorrowRequest(LibrarianId, userId, bookId);
+};
+
   
   // Approve borrow request
   const approveBorrowRequest = async (requestId) => {
@@ -25,7 +35,12 @@ const requestToBorrowBook = async (LibrarianId , userId, bookId) => {
       throw new Error('Request is already approved or rejected');
     }
   
-    const book = await bookRepository.getBookById(request.bookId);
+     // Check for the book in both repositories
+  const bookFromRepository = await bookRepository.getBookById(request.bookId);
+  const bookFromAdminRepository = await AdminbookRepository.getBookById(request.bookId);
+
+  // Determine if the book exists in either repository
+  const book = bookFromRepository || bookFromAdminRepository;
     if (!book) {
       throw new Error('Book not found');
     }

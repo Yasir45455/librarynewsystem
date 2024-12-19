@@ -1,9 +1,16 @@
 const mongoose = require('mongoose');
 
 const BorrowRequestSchema = new mongoose.Schema({
- 
   userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
-  bookId: { type: mongoose.Schema.Types.ObjectId, ref: 'Book', required: true }, // the book being requested
+  bookId: { 
+    type: mongoose.Schema.Types.ObjectId, 
+    required: true,
+    refPath: 'bookModel' // This will dynamically reference either 'Book' or 'AdminBook' based on the value of 'bookModel'
+  },
+  bookModel: { 
+    type: String, 
+    enum: ['Book', 'AdminBook'] // Ensure the model is either 'Book' or 'AdminBook'
+  },
   status: { type: String, enum: ['pending', 'approved', 'rejected'], default: 'pending' },
   LibrarianId: {
     type: mongoose.Schema.Types.ObjectId,

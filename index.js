@@ -54,6 +54,7 @@ const cookieParser = require('cookie-parser');
 const userRouter = require("./routes/user");
 const adminRoutes = require('./routes/adminRoutes');
 const bookRoutes = require('./routes/bookRoutes');
+const AdminbookRoutes = require('./routes/AdminbookRoutes');
 const authorRoutes = require('./routes/authorRoutes');
 const categoryRoutes = require('./routes/categoryRoutes'); 
 const borrowRoutes = require('./routes/borrowRoutes'); 
@@ -78,7 +79,7 @@ if (cluster.isPrimary) {
   } else {
     // Worker processes
     const app = express();
-    const PORT = process.env.PORT;
+    const PORT = process.env.PORT || 3004;
     app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
     app.use(express.json());
@@ -98,6 +99,8 @@ if (cluster.isPrimary) {
     app.use("/user", userRouter);
     app.use("/admin", adminRoutes);
     app.use("/books", bookRoutes);
+    app.use("/adminbooks", AdminbookRoutes);
+    
     app.use("/author", authorRoutes);
     app.use("/category", categoryRoutes);
     app.use("/borrow", borrowRoutes);

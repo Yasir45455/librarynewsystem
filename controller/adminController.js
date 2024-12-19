@@ -7,12 +7,12 @@ class AdminController {
   static async register(req, res) {
     try {
       const { email, password } = req.body;
-      
+
       // Call the service layer to create the admin
       const admin = await AdminService.createAdmin({ email, password });
-      
+
       // Optionally, create a JWT token for the new admin (if you're using JWT)
-      const token = jwt.sign({ adminId: admin._id }, 'your_secret_key', { expiresIn: '1d' });
+      const token = jwt.sign({ adminId: admin._id }, process.env.ADMIN_JWT_SECRET, { expiresIn: '1d' });
 
       res.status(201).json({
         message: 'Admin registered successfully!',
@@ -41,8 +41,7 @@ class AdminController {
       }
 
       // Generate JWT token for login
-      const token = jwt.sign({ adminId: admin._id }, 'your_secret_key', { expiresIn: '1d' });
-
+      const token = jwt.sign({ adminId: admin._id }, process.env.ADMIN_JWT_SECRET, { expiresIn: '1d' });
       res.status(200).json({
         message: 'Login successful!',
         token

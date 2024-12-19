@@ -1,4 +1,5 @@
 const Book = require('../models/book');
+const AdminBook = require('../models/AdminBooks');
 
 const createBook = async (bookData) => {
   const book = new Book(bookData);
@@ -42,7 +43,7 @@ const updateBookCopies = async (bookId, copies) => {
 };
 
 const getBookByIsbnAndUser = async (user, isbn) => {
-  return await Book.findOne({ user, isbn }); // Assuming `Book` is your Mongoose model
+  return await Book.findOne({ user, isbn }); 
 };
 
 
@@ -52,10 +53,14 @@ const getBookByIsbnAndAdmin = async (admin, isbn) => {
 
 // Repository
 const getBooksByCategory = async (category) => {
-  const sanitizedCategory = category.replace(-/[.*+?^=!:${}()|\[\]\/\\]/g, '\\$&');
-  console.log(sanitizedCategory)
-  return await Book.find({ category: { $regex: new RegExp('^' + sanitizedCategory + '$', 'i') } });
+  const sanitizedCategory = category.replace(/([.*+?^=!:${}()|\[\]\/\\])/g, '\\$1');
+
+  const adminBooks = await AdminBook.find({ category: { $regex: new RegExp('^' + sanitizedCategory + '$', 'i') } });
+  const books = await Book.find({ category: { $regex: new RegExp('^' + sanitizedCategory + '$', 'i') } });
+
+  return [...adminBooks, ...books];
 };
+
 
 module.exports = {
   createBook,

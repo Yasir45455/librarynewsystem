@@ -1,4 +1,7 @@
 const borrowService = require('../services/borrowService');
+const bookRepository = require('../repositories/bookRepository')
+const AdminbookRepository = require('../repositories/AdminbookRepository')
+
 const requestToBorrowBook = async (req, res) => {
   try {
     const { LibrarianId, userId, bookId } = req.body;
@@ -39,13 +42,26 @@ const rejectBorrowRequest = async (req, res) => {
 const getAllBorrowRequests = async (req, res) => {
   try {
     const requests = await borrowService.getAllBorrowRequests();
-    res.status(200).json({ message: 'All borrow requests fetched successfully', requests });
+
+    // Fetch book data concurrently for all requests
+    const updatedRequests = await Promise.all(
+      requests.map(async (request) => {
+        const bookFromRepository = await bookRepository.getBookById(request.bookId);
+        const bookFromAdminRepository = await AdminbookRepository.getBookById(request.bookId);
+
+        // Assign book data or null if neither exists
+        request.bookId = bookFromRepository || bookFromAdminRepository || null;
+        return request;
+      })
+    );
+
+    res.status(200).json({ message: 'All borrow requests fetched successfully', requests: updatedRequests });
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
 };
 
-// Other functions remain the same
+// Get borrow requests for a specific user
 const getUserBorrowRequests = async (req, res) => {
   try {
     const userId = req.params.userId;
@@ -53,24 +69,52 @@ const getUserBorrowRequests = async (req, res) => {
     if (requests.length === 0) {
       return res.status(404).json({ message: 'No borrow requests found for this user.' });
     }
-    res.status(200).json(requests);
-  } catch (err) {
+
+    // Fetch book data concurrently for all user borrow requests
+    const updatedRequests = await Promise.all(
+      requests.map(async (request) => {
+        const bookFromRepository = await bookRepository.getBookById(request.bookId);
+        const bookFromAdminRepository = await AdminbookRepository.getBookById(request.bookId);
+
+        // Assign book data or null if neither exists
+        request.bookId = bookFromRepository || bookFromAdminRepository || null;
+        return request;
+      })
+    );
+
+    res.status(200).json({ message: 'User borrow requests fetched successfully', requests: updatedRequests });
+  } catch (error) {
     res.status(500).json({ message: 'Server error' });
   }
 };
+
 
 const getLibrarianBorrowRequests = async (req, res) => {
   try {
     const LibrarianId = req.params.LibrarianId;
     const requests = await borrowService.getLibrarianBorrowRequests(LibrarianId);
     if (requests.length === 0) {
-      return res.status(404).json({ message: 'No borrow requests found for this user.' });
+      return res.status(404).json({ message: 'No borrow requests found for this librarian.' });
     }
-    res.status(200).json(requests);
-  } catch (err) {
+
+    // Fetch book data concurrently for all librarian borrow requests
+    const updatedRequests = await Promise.all(
+      requests.map(async (request) => {
+        const bookFromRepository = await bookRepository.getBookById(request.bookId);
+        const bookFromAdminRepository = await AdminbookRepository.getBookById(request.bookId);
+
+        // Assign book data or null if neither exists
+        request.bookId = bookFromRepository || bookFromAdminRepository || null;
+        return request;
+      })
+    );
+
+    res.status(200).json({ message: 'Librarian borrow requests fetched successfully', requests: updatedRequests });
+  } catch (error) {
     res.status(500).json({ message: 'Server error' });
   }
 };
+
 
 
 module.exports = {
@@ -81,3 +125,5 @@ module.exports = {
   getAllBorrowRequests, // Add this line to export the new function
   getLibrarianBorrowRequests,
 };
+
+

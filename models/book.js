@@ -11,6 +11,7 @@ const bookSchema = new mongoose.Schema({
   noOfPages: { type: Number, required: true },
   publishYear: { type: Number, required: true },
   availableCopies: { type: Number, required: true },
+  tags: [{ type: String }],
   image: {
     type: String,
 },
