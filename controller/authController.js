@@ -1,4 +1,7 @@
 const authService = require("../services/authService")
+const crypto = require('crypto');
+const userRepository = require('../repositories/userRepository');
+
 // User Registration
 const register = async (req, res) => {
     const { username, email, password } = req.body;
@@ -23,14 +26,11 @@ const login = async (req, res) => {
         res.status(400).json({ message: error.message });
     }
 };
-
 // Logout
 const logout = (req, res) => {
     res.clearCookie('token'); // Clear the cookie
     res.status(200).json({ message: 'Logout successful' });
 };
-
-
 // Function to get a user by ID
 const getUserById = async (req, res) => {
   try {
@@ -80,6 +80,31 @@ const updateUser = async (req, res) => {
   }
 };
 
+
+const verifyEmail = async (req, res) => {
+  const { token } = req.query;
+
+  try {
+      const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
+      const user = await userRepository.findByToken(hashedToken);
+
+      if (!user || user.verificationTokenExpiry < new Date()) {
+          throw new Error('Invalid or expired token');
+      }
+
+      user.isVerified = true;
+      user.verificationToken = null;
+      user.verificationTokenExpiry = null;
+      await user.save();
+
+      res.status(200).json({ message: 'Email verified successfully' });
+  } catch (error) {
+      res.status(400).json({ message: error.message });
+  }
+};
+
+
+
 module.exports = {
   getUserById,
   getAllUsers,
@@ -87,5 +112,6 @@ module.exports = {
   updateUser,
   register,
   login,
-  logout
+  logout,
+  verifyEmail
 };

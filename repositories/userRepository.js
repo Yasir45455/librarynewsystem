@@ -31,6 +31,13 @@ const updateUserById = async (userId, updateData) => {
   return await User.findByIdAndUpdate(userId, updateData, { new: true });
 };
 
+
+const findByToken = async (hashedToken) => {
+  return User.findOne({ verificationToken: hashedToken });
+};
+
+
+
 module.exports = {
   findUserById,
   findAllUsers,
@@ -38,4 +45,5 @@ module.exports = {
   updateUserById,
   findByEmail,
   createUser,
+  findByToken
 };

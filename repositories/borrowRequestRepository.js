@@ -7,8 +7,11 @@ const createBorrowRequest = async (LibrarianId,userId, bookId) => {
     userId,
     bookId,
     status: 'pending',
+    returnDate: null,
   });
-  return await request.save();
+   const savedRequest = await request.save();
+   return await BorrowRequest.findById(savedRequest._id)
+   .populate('userId', 'username'); 
 };
 // Get all borrow requests
 const getAllBorrowRequests = async () => {
@@ -20,8 +23,13 @@ const getBorrowRequestById = async (requestId) => {
 };
 
 // Update borrow request status (approve/reject)
-const updateBorrowRequestStatus = async (requestId, status) => {
-  return await BorrowRequest.findByIdAndUpdate(requestId, { status }, { new: true });
+const updateBorrowRequestStatus = async (requestId, status, returnDate) => {
+  return await BorrowRequest.findByIdAndUpdate(requestId, { status, returnDate }, { new: true });
+};
+
+// Update borrow request status (Returned)
+const updateBorrowRequestStatusReturned = async (requestId, status, returnedDate) => {
+  return await BorrowRequest.findByIdAndUpdate(requestId, { status, returnedDate }, { new: true });
 };
 
 findRequestsByUserId = async (userId) => {
@@ -46,5 +54,6 @@ module.exports = {
   findRequestsByUserId,
   updateBorrowRequestStatus,
   findRequestsByLibrarianId,
+  updateBorrowRequestStatusReturned,
   findRequestOnce
 };

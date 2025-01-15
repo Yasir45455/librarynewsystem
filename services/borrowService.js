@@ -25,7 +25,7 @@ const requestToBorrowBook = async (LibrarianId, userId, bookId) => {
 
   
   // Approve borrow request
-  const approveBorrowRequest = async (requestId) => {
+  const approveBorrowRequest = async (requestId, returnDate) => {
     const request = await borrowRequestRepository.getBorrowRequestById(requestId);
     if (!request) {
       throw new Error('Request not found');
@@ -53,7 +53,7 @@ const requestToBorrowBook = async (LibrarianId, userId, bookId) => {
     await bookRepository.updateBookCopies(request.bookId, book.availableCopies - 1);
   
     // Update the borrow request status to approved
-    return await borrowRequestRepository.updateBorrowRequestStatus(requestId, 'approved');
+    return await borrowRequestRepository.updateBorrowRequestStatus(requestId, 'approved', returnDate);
   };
   
   // Reject borrow request
@@ -104,12 +104,50 @@ const findRequestOnce = async (userId, bookId) => {
   // Return all existing requests for logging or other checks if needed
   return existingRequests;
 };
+
+
+
+
+
+  // Return borrow request
+  const returnBorrowRequest = async (requestId, returnedDate) => {
+    console.log(returnedDate)
+    const request = await borrowRequestRepository.getBorrowRequestById(requestId);
+    if (!request) {
+      throw new Error('Request not found');
+    }
+    
+    if (request.status == 'returned') {
+      throw new Error('Request is already returned');
+    }
+  
+     // Check for the book in both repositories
+  const bookFromRepository = await bookRepository.getBookById(request.bookId);
+  const bookFromAdminRepository = await AdminbookRepository.getBookById(request.bookId);
+
+  // Determine if the book exists in either repository
+  const book = bookFromRepository || bookFromAdminRepository;
+    if (!book) {
+      throw new Error('Book not found');
+    }
+  
+    // if (book.availableCopies <= 0) {
+    //   throw new Error('No copies available to approve the request');
+    // }
+  
+    // Update the book's available copies
+    await bookRepository.updateBookCopies(request.bookId, book.availableCopies + 1);
+  
+    // Update the borrow request status to approved
+    return await borrowRequestRepository.updateBorrowRequestStatusReturned(requestId, 'returned', returnedDate);
+  };
 module.exports = {
     requestToBorrowBook,
     approveBorrowRequest,
     rejectBorrowRequest,
     getAllBorrowRequests,
     getUserBorrowRequests,
+    returnBorrowRequest,
     getLibrarianBorrowRequests,
     findRequestOnce
 };

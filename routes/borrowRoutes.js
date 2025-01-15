@@ -7,11 +7,14 @@ router.post('/request', borrowController.requestToBorrowBook);
 // Get all borrow requests (admin view)
 router.get('/allrequest', borrowController.getAllBorrowRequests);
 
-// Admin approve borrow request
+//  approve borrow request
 router.put('/approve/:requestId', borrowController.approveBorrowRequest);
 
-// Admin reject borrow request
+//  reject borrow request
 router.put('/reject/:requestId', borrowController.rejectBorrowRequest);
+
+//  Returned borrow request
+router.put('/return/:requestId', borrowController.returnBorrowRequest);
 
 // Get borrow requests for a specific user
 router.get('/allrequest/:userId', borrowController.getUserBorrowRequests);

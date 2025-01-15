@@ -121,7 +121,7 @@ const getBookById = async (req, res) => {
 const getBooksByCategory = async (req, res) => {
   try {
     const category = req.params.category.toLowerCase();
-    console.log('Category:', category);
+    
     const books = await bookService.getBooksByCategory(category);
     if (!books) {
       return res.status(404).json({ message: 'No books found for this category' });

@@ -1,16 +1,30 @@
 const borrowService = require('../services/borrowService');
 const bookRepository = require('../repositories/bookRepository')
 const AdminbookRepository = require('../repositories/AdminbookRepository')
+const sendemail = require("../sendEmail/sendEmail")
+const notificationRepository = require('../repositories/notificationRepository');
 
 const requestToBorrowBook = async (req, res) => {
   try {
     const { LibrarianId, userId, bookId } = req.body;
-
-    await borrowService.findRequestOnce(userId, bookId); 
-    
+    await borrowService.findRequestOnce(userId, bookId);
     const request = await borrowService.requestToBorrowBook(LibrarianId, userId, bookId);
 
     res.status(201).json({ message: 'Borrow request created successfully', request });
+
+    // For Saving Notification
+    const notificationData = {
+      message: `Borrow Request Received from ${request.userId.username}`,
+      userId: LibrarianId,
+      isRead: false,
+      createdAt: new Date().toISOString()
+    };
+
+    await notificationRepository.createNotification(notificationData);
+
+    // For Sending Email
+    await sendemail.SendEmailBorrowRequest(userId, bookId, LibrarianId);
+
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
@@ -21,8 +35,19 @@ const requestToBorrowBook = async (req, res) => {
 const approveBorrowRequest = async (req, res) => {
   try {
     const { requestId } = req.params;
-    const result = await borrowService.approveBorrowRequest(requestId);
+    const { returnDate } = req.body;
+    // Validate returnDate
+    if (!returnDate) {
+      return res.status(400).json({ message: 'Invalid or missing return date' });
+    }
+
+    const result = await borrowService.approveBorrowRequest(requestId, returnDate);
+
+    const { userId, LibrarianId, bookId } = result;
+
     res.status(200).json({ message: 'Request approved successfully', result });
+    await sendemail.SendEmailOnApproveRequest(userId, bookId, LibrarianId , requestId);
+
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
@@ -33,7 +58,12 @@ const rejectBorrowRequest = async (req, res) => {
   try {
     const { requestId } = req.params;
     const result = await borrowService.rejectBorrowRequest(requestId);
+
+    const { userId, LibrarianId, bookId } = result;
+
     res.status(200).json({ message: 'Request rejected successfully', result });
+    await sendemail.SendEmailOnRejectRequest(userId, bookId, LibrarianId);
+
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
@@ -117,10 +147,34 @@ const getLibrarianBorrowRequests = async (req, res) => {
 
 
 
+// Approve a borrow request
+const returnBorrowRequest = async (req, res) => {
+  try {
+    const { requestId } = req.params;
+    const { returnedDate } = req.body;
+    // Validate returnDate
+    if (!returnedDate) {
+      return res.status(400).json({ message: 'Invalid or missing return date' });
+    }
+
+    const result = await borrowService.returnBorrowRequest(requestId, returnedDate);
+
+    const { userId, LibrarianId, bookId } = result;
+
+    res.status(200).json({ message: 'Request Returned successfully', result });
+    await sendemail.SendEmailOnReturnedRequest(userId, bookId, LibrarianId , requestId);
+
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+};
+
+
 module.exports = {
   requestToBorrowBook,
   approveBorrowRequest,
   rejectBorrowRequest,
+  returnBorrowRequest,
   getUserBorrowRequests,
   getAllBorrowRequests, // Add this line to export the new function
   getLibrarianBorrowRequests,
