@@ -26,7 +26,8 @@ router.get('/user/:userId', categoryController.getCategoriesByUserId); // Get ca
 router.get('/:categoryName', categoryController.getCategoryByName);
 
 // PUT: Update a category by ID
-router.put('/:id',authenticateAdmin, categoryController.updateCategory);
+// router.put('/:id',authenticateAdmin, categoryController.updateCategory);
+router.put('/:id',authenticateAdmin,upload.single('image'), categoryController.updateCategory);
 
 // DELETE: Delete a category by ID
 router.delete('/:id',authenticateAdmin, categoryController.deleteCategory);

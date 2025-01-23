@@ -31,6 +31,9 @@ const updateBook = async (id, updatedData) => {
 const deleteBook = async (id) => {
   return await Book.findByIdAndDelete(id);
 };
+const deleteBooksByUserId = async (id) => {
+  return await Book.deleteMany({ user: id }); 
+};
 
 // Get a book by ID
 const getBookById = async (bookId) => {
@@ -74,5 +77,6 @@ module.exports = {
   getBooksByAdminId,
   getBookByIsbnAndUser,
   getBookByIsbnAndAdmin,
-  getBooksByCategory
+  getBooksByCategory,
+  deleteBooksByUserId
 };

@@ -85,9 +85,9 @@ class CategoryController {
   static async updateCategory(req, res) {
     const { id } = req.params;
     const { categoryName } = req.body;
-
+    const image = req.file ? req.file.path : null; 
     try {
-      const updatedCategory = await CategoryService.updateCategory(id, { categoryName });
+      const updatedCategory = await CategoryService.updateCategory(id, { categoryName, image });
       if (!updatedCategory) {
         return res.status(404).json({ message: 'Category not found' });
       }
@@ -96,7 +96,7 @@ class CategoryController {
       res.status(500).json({ error: error.message });
     }
   }
-
+  
   // Delete a category by ID
   static async deleteCategory(req, res) {
     const { id } = req.params;

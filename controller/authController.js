@@ -1,6 +1,8 @@
 const authService = require("../services/authService")
 const crypto = require('crypto');
 const userRepository = require('../repositories/userRepository');
+const libraryService = require('../services/libraryService');
+const bookService = require('../services/bookService');
 
 // User Registration
 const register = async (req, res) => {
@@ -61,6 +63,8 @@ const deleteUser = async (req, res) => {
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
+    await libraryService.deleteLibraryByUserId(req.params.id);
+    await bookService.deleteBooksByUserId(req.params.id);
     res.json({ message: 'User deleted successfully' });
   } catch (error) {
     res.status(500).json({ error: error.message });

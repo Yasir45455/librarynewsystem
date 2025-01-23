@@ -13,7 +13,7 @@ const categoryRoutes = require('./routes/categoryRoutes');
 const borrowRoutes = require('./routes/borrowRoutes'); 
 const libraryRoutes = require('./routes/libraryRoutes');
 const notificationRoutes = require('./routes/notificationRoutes');
-
+const path = require('path');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
@@ -22,6 +22,7 @@ app.use(cookieParser());
 const dotenv = require('dotenv');
 
 dotenv.config();
+  app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Enable CORS for all origins
 app.use(cors());  

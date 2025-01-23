@@ -27,6 +27,7 @@ class CategoryService {
   static async updateCategory(id, data) {
     return CategoryRepository.updateCategory(id, data);
   }
+  
 
   static async deleteCategory(id) {
     return CategoryRepository.deleteCategory(id);

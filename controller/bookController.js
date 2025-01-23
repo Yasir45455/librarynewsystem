@@ -1,9 +1,9 @@
 const bookService = require('../services/bookService');
+const libraryService = require('../services/libraryService');
 
 const createBook = async (req, res) => {
   try {
     const { user, admin, isbn, ...bookData } = req.body;
-
     // Validate the ISBN
     if (!isbn) {
       return res.status(400).json({ error: 'ISBN is required.' });
@@ -18,11 +18,16 @@ const createBook = async (req, res) => {
 
     // Add user or admin reference
     if (user) {
+      console.log(user)
       bookData.user = user;
-      await bookService.findBookUniqueIsbn(user, isbn); 
+      await bookService.findBookUniqueIsbn(user, isbn);
+      const LibraryName = await libraryService.getLibraryByUserId(user);
+      bookData.LibraryName = LibraryName.libraryName;
+      console.log(LibraryName)
+
     } else if (admin) {
       bookData.admin = admin;
-      await bookService.findBookUniqueIsbnforAdmin(admin, isbn); 
+      await bookService.findBookUniqueIsbnforAdmin(admin, isbn);
     }
 
     // Add the ISBN to bookData
@@ -46,10 +51,6 @@ const createBook = async (req, res) => {
     }
   }
 };
-
-
-
-
 
 const getAllBooks = async (req, res) => {
   try {
@@ -95,11 +96,11 @@ const getBooksByAdminId = async (req, res) => {
     }
 
     const response = {
-      adminId: adminId,  
-      books: books 
+      adminId: adminId,
+      books: books
     };
 
-    res.status(200).json(response); 
+    res.status(200).json(response);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

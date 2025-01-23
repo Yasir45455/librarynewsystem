@@ -22,11 +22,16 @@ const updateLibraryById = async (id, data) => {
 // Delete a library by ID
 const deleteLibraryById = async (id) => await Library.findByIdAndDelete(id);
 
+const deleteLibraryByUserId = async (id) => {
+  return await Library.findOneAndDelete({ userId: id });
+};
+
 module.exports = {
   addLibrary,
   getAllLibraries,
   getLibraryById,
   updateLibraryById,
   deleteLibraryById,
-  getLibraryByUserId
+  getLibraryByUserId,
+  deleteLibraryByUserId
 };

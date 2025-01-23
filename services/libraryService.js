@@ -40,6 +40,12 @@ const deleteLibraryById = async (id) => {
   return library;
 };
 
+const deleteLibraryByUserId = async (id) => {
+  const library = await libraryRepository.deleteLibraryByUserId(id);
+  if (!library) throw new Error('Library not found or could not be deleted.');
+  return library;
+};
+
 const getLibraryByUserId = async (userId) => {
   const library = await libraryRepository.getLibraryByUserId(userId);
   if (!library) throw new Error('Library not found.');
@@ -52,5 +58,6 @@ module.exports = {
   getLibraryById,
   updateLibraryById,
   deleteLibraryById,
-  getLibraryByUserId
+  getLibraryByUserId,
+  deleteLibraryByUserId
 };

@@ -57,6 +57,10 @@ const getBooksByCategory = async (category) => {
   return await bookRepository.getBooksByCategory(category);
 };
 
+
+const deleteBooksByUserId = async (id) => {
+  return await bookRepository.deleteBooksByUserId(id);
+};
 module.exports = {
   createBook,
   getAllBooks,
@@ -67,5 +71,6 @@ module.exports = {
   getBooksByAdminId,
   findBookUniqueIsbn,
   findBookUniqueIsbnforAdmin,
-  getBooksByCategory
+  getBooksByCategory,
+  deleteBooksByUserId
 };

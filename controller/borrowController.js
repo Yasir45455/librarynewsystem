@@ -3,10 +3,15 @@ const bookRepository = require('../repositories/bookRepository')
 const AdminbookRepository = require('../repositories/AdminbookRepository')
 const sendemail = require("../sendEmail/sendEmail")
 const notificationRepository = require('../repositories/notificationRepository');
+const authService = require("../services/authService")
 
 const requestToBorrowBook = async (req, res) => {
   try {
     const { LibrarianId, userId, bookId } = req.body;
+    const user = await authService.getUserById(userId);
+    if (!user) {
+      return res.status(404).json({ message: 'User not Registered' });
+    }
     await borrowService.findRequestOnce(userId, bookId);
     const request = await borrowService.requestToBorrowBook(LibrarianId, userId, bookId);
 
@@ -46,7 +51,7 @@ const approveBorrowRequest = async (req, res) => {
     const { userId, LibrarianId, bookId } = result;
 
     res.status(200).json({ message: 'Request approved successfully', result });
-    await sendemail.SendEmailOnApproveRequest(userId, bookId, LibrarianId , requestId);
+    await sendemail.SendEmailOnApproveRequest(userId, bookId, LibrarianId, requestId);
 
   } catch (error) {
     res.status(400).json({ message: error.message });
@@ -162,7 +167,7 @@ const returnBorrowRequest = async (req, res) => {
     const { userId, LibrarianId, bookId } = result;
 
     res.status(200).json({ message: 'Request Returned successfully', result });
-    await sendemail.SendEmailOnReturnedRequest(userId, bookId, LibrarianId , requestId);
+    await sendemail.SendEmailOnReturnedRequest(userId, bookId, LibrarianId, requestId);
 
   } catch (error) {
     res.status(400).json({ message: error.message });
