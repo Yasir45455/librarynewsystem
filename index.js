@@ -33,9 +33,11 @@ app.use(cors());
 MongoDBConnect("mongodb+srv://usernew:12345@cluster0.5pgjybj.mongodb.net/Library_System?retryWrites=true&w=majority&appName=Cluster0");
 // Run the email logic only in the primary process
 require('./sendEmail/sendEmailOnDeadline');  // This will run only once in the primary process
-app.get("/", (req, res) => {
-    res.send("Hello There");
+app.get('/', (req, res) => { 
+  res.send('Hello Brother');
 });
+
+app.get('/favicon.ico', (req, res) => res.status(204).end());
 
 app.use("/user", userRouter);
 app.use("/admin", adminRoutes);
